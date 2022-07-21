@@ -1,191 +1,153 @@
 import os
-import discord 
+import discord
 import requests
 import json
+import config
 import asyncio
-import keep_alive
-from discord.ext import commands
-from discord_slash import SlashCommand
-from datetime import datetime 
+import datetime
+import pytz
+from discord.ext import command
 
-my_secret = os.environ['Token']
-bot = commands.Bot(command_prefix="5!",help_command=None)
-slash = SlashCommand(bot, sync_commands=True, sync_on_cog_reload=True)
+bot = commands.Bot(command_prefix="!", help_command=None)
 
-@bot.event
-async def on_ready():
-    print(f'目前登入身份：',bot.user)
+if os.path.isfile("servers.json"):
+    with open('servers.json', encoding='utf-8') as f:
+        servers = json.load(f)
+else:
+    servers = {"servers": []}
+    with open('servers.json', 'w') as f:
+        json.dump(servers, f, indent=4)
 
 @bot.event
 async def on_ready():
     bot.loop.create_task(status())
+    print(f'目前登入身份：',bot.user)
 
 
 @bot.event
 async def status():
     try:
         while True:
-            await update(f'5!help')
-            await asyncio.sleep(300)
-            await update(f'已在第{len(bot.guilds)}伺服器中管理')
-            await asyncio.sleep(300)
-            await update(f'機械人由benyeung08主席«主帳號»#5049製作')
-            await asyncio.sleep(300)
+            await update(f'ben08 bot🟠')
+            await asyncio.sleep(15)
+            await update(f'ben08 bot 服務伺服器：{len(bot.guilds)}')
+            await asyncio.sleep(15)
+            await update(f'由ben08#5049製作及擁有')
+            await asyncio.sleep(15)
+            await update(f'更新中…')
+            await asyncio.sleep(15)
     finally:
         bot.loop.create_task(status())
 
 
 @bot.event
 async def update(text):
-   await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.streaming, name=text))
-
-  # Eve
-
-
-#to load the cogs from ./cogs folder
-for Filename in os.listdir('./cogs'):
-    if Filename.endswith('.py'): 
-     bot.load_extension(f'cogs.{Filename[:-3]}')
-
-@bot.command(name="test")
-@commands.has_permissions()
-async def test(ctx):
-    print("h")
-
-@bot.command(name="help")
-async def help_command(ctx):
-   embed=discord.Embed(title="幫助",description="指令開頭是<5!>", color=0xff8c00)
-   embed.add_field(name="command", value="幫助指令", inline=False)
-   embed.add_field(name="server_command", value="幫助伺服器", inline=False)
-   embed.set_footer(text="幫助由benyeung08主席«主帳號»#5049")
-   msg = await ctx.send(embed=embed)
-   await ctx.message.delete()
-   await asyncio.sleep(300)
-   await msg.delete()
- #"\n"是換行
- #修改完記得重新run
-
-@bot.command(name="command")
-async def help_command(ctx):
-   embed=discord.Embed(title="幫助指令", color=0xff8c00)
-   embed.add_field(name="rank", value="查看等級指令", inline=False)
-   embed.add_field(name="管理指令", value="管理用的指令", inline=False)
-   embed.add_field(name="userinfo", value="關於使用者", inline=False)
-   embed.add_field(name="avatar", value="頭像", inline=False)
-   embed.add_field(name="server", value="關於伺服器", inline=False)
-   embed.set_footer(text="幫助指令由benyeung08主席«主帳號»#5049")
-   msg = await ctx.send(embed=embed)
-   await ctx.message.delete()
-   await asyncio.sleep(300)
-   await msg.delete()
-
-@bot.command(name="管理指令")
-async def 管理指令(ctx):
-   embed=discord.Embed(title="管理指令", color=0xff8c00)
-   embed.add_field(name="clean", value="清除訊息", inline=False)
-   embed.add_field(name="ban", value="踢出", inline=False)
-   embed.add_field(name="unban", value="解除踢出", inline=False)
-   embed.set_footer(text="管理指令由benyeung08主席«主帳號»#5049")
-   msg = await ctx.send(embed=embed)
-   await ctx.message.delete()
-   await asyncio.sleep(300)
-   await msg.delete()
-@bot.command(name="server_command")
-async def server_command(ctx):
-   embed=discord.Embed(title="幫助伺服器", color=0xff8c00)
-   embed.set_footer(text="幫助由benyeung08主席«主帳號»#5049")
-   await ctx.message.delete()
-   await ctx.send(embed=embed)
+   await bot.change_presence(activity=discord.Activity(
+   type=discord.ActivityType.playing, name=text))
 
 @bot.command()
-async def server_新中文交友聯合國(ctx):
-   await ctx.message.delete()
-   await ctx.send(f"https://discord.gg/Y7XEEhwBM6")
+async def help(ctx, arg=''):
+ if arg == '':
+   embed = discord.Embed(title="——————»幫助指令«——————", description="指令開頭是«b.»\n本機械人是`ben08 bot`", color=discord.Color.random())
+   embed.add_field(name="誇群系統指令", value="help 誇群指令", inline=False)
+   embed.add_field(name="支援伺服器", value="[點擊加入支援伺服器](https://discord.gg/UJ2XgkcEyv)", inline=False)
+   embed.add_field(name="指令使用者", value=f"{ctx.author.mention}", inline=False)
+   msg=await ctx.channel.send(embed=embed)
+   await msg.add_reaction("✅")
+ 
+ if arg == '誇群指令':
+   embed = discord.Embed(title="——————»誇群聊天系統幫助指令«——————", description="本機械人是`ben08 bot`", color=discord.Color.random())
+   embed.add_field(name="addGlobal-連接誇群聊天", value="__***管理員用***__", inline=False)
+   embed.add_field(name="支援伺服器", value="[點擊加入支援伺服器](https://discord.gg/UJ2XgkcEyv)", inline=False)
+   embed.add_field(name="指令使用者", value=f"{ctx.author.mention}", inline=False)
+   msg=await ctx.channel.send(embed=embed)
+   await msg.add_reaction("✅") 
 
 @bot.command()
-async def server_支援伺服器(ctx):
-   await ctx.message.delete()
-   await ctx.send(f"https://discord.gg/aEtjvk4uUX")
+async def addGlobal(ctx):
+    if ctx.author.guild_permissions.administrator:
+        if not guild_exists(ctx.guild.id):
+            server = {
+                "guildid": ctx.guild.id,
+                "channelid": ctx.channel.id,
+                "invite": f'{(await ctx.channel.create_invite()).url}'
+            }
+            servers["servers"].append(server)
+            with open('servers.json', 'w') as f:
+                json.dump(servers, f, indent=4)
+            await ctx.send('已創建！')
 
-@bot.command(name="機械人邀請連結")
-@commands.is_owner()
-async def 機械人邀請連結(ctx):
-   embed=discord.Embed(title="機械人邀請連結", description="https://discord.com/oauth2/authorize?client_id=936964308431171615&permissions=2147485736&scope=bot%20applications.commands", color=0xff8c00)
-   embed.set_footer(text="機械人邀請連結由benyeung08主席«主帳號»#5049")
-   await ctx.message.delete()
-   await ctx.send(embed=embed)
 
-#The below code bans player.
 @bot.command()
-@commands.has_permissions(administrator=True)
-async def ban(ctx, member : discord.Member, *, reason = None):
-   await member.ban(reason = reason)
+async def removeGlobal(ctx):
+    if ctx.member.guild_permissions.administrator:
+        if guild_exists(ctx.guild.id):
+            globalid = get_globalChat_id(ctx.guild.id)
+            if globalid != -1:
+                servers["servers"].pop(globalid)
+                with open('servers.json', 'w') as f:
+                    json.dump(servers, f, indent=4)
+            await ctx.send('離開！')
 
-#The below code unbans player.
-@bot.command()
-@commands.has_permissions(administrator=True)
-async def unban(ctx, *, member):
-    banned_users = await ctx.guild.bans()
-    member_name, member_discriminator = member.split("#")
 
-    for ban_entry in banned_users:
-        user = ban_entry.user
+#########################################
 
-        if (user.name, user.discriminator) == (member_name, member_discriminator):
-            await ctx.guild.unban(user)
-            await ctx.send(f'Unbanned {user.mention}')
-            return
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return
+    if not message.content.startswith('!'):
+        if get_globalChat(message.guild.id, message.channel.id):
+            await sendAll(message)
+    await bot.process_commands(message)
 
-def gettime(): 
-    
-  datetime_HK = datetime.now() #獲得當前日期時間咨詢
-  return datetime_HK.strftime("%H : %M : %S") #返回時間數值
 
-def getdate():
-  datetime_HK = datetime.now()
-  return datetime_HK.strftime("%d/%m/%Y") #返回日期數值
+#########################################
 
-@bot.command(name="cet")
-@commands.is_owner()
-async def cet_command(ctx, *, msg=''):
-   embed=discord.Embed(title=msg, color=0xff8c00)
-   embed.set_footer(text=f'當前日期(DD/MM/YYYY)和時間(UTC+8):\n {getdate()} {gettime()}')
-   await ctx.message.delete()
-   await ctx.send(embed=embed)
+async def sendAll(message: Message):
+    embed = discord.Embed(title="誇群系統聊天", description=message.content)
+    embed.set_footer(text='從服務器發送 {}'.format(message.guild.name))
 
-@bot.command(name="cot")
-@commands.is_owner()
-async def cot_command(ctx, *, msg):
-   embed=discord.Embed(description=msg, color=0xff8c00)
-   await ctx.message.delete()
-   await ctx.send(embed=embed)
+    for server in servers["servers"]:
+        guild: Guild = bot.get_guild(int(server["guildid"]))
+        if guild:
+            channel: TextChannel = guild.get_channel(int(server["channelid"]))
+            if channel:
+                await channel.send(embed=embed)
+    await message.delete()
 
-@bot.command(name="load")
-async def load(ctx, extension):
-  bot.load_extension(f'cogs.{extension}')
-  await ctx.message.delete()
-  await ctx.send(f'Loaded {extension} done')
 
-@bot.command(name="unload")
-async def unload(ctx, extension):
-  bot.unload_extension(f'cogs.{extension}')
-  await ctx.message.delete()
-  await ctx.send(f'Un - loaded {extension} done')
+###############################
 
-@bot.command(name="reload")
-async def reload(ctx, extension):
-  bot.reload_extension(f'cogs.{extension}')
-  await ctx.message.delete()
-  await ctx.send(f'Re - Loaded {extension} done')
+def guild_exists(guildid):
+    for server in servers['servers']:
+        if int(server['guildid'] == int(guildid)):
+            return True
+    return False
 
-@bot.command(name="reloadall")
-async def reloadall(ctx):
-  for file in os.listdir("cogs"):
-   if file.endswith(".py"):
-    name = file[:-3]
-    bot.reload_extension(f"cogs.{name}")
-  await ctx.message.delete()
-  await ctx.send("重新載入成功")
 
-keep_alive.keep_alive()
-bot.run(my_secret)
+def get_globalChat(guild_id, channelid=None):
+    globalChat = None
+    for server in servers["servers"]:
+        if int(server["guildid"]) == int(guild_id):
+            if channelid:
+                if int(server["channelid"]) == int(channelid):
+                    globalChat = server
+            else:
+                globalChat = server
+    return globalChat
+
+
+def get_globalChat_id(guild_id):
+    globalChat = -1
+    i = 0
+    for server in servers["servers"]:
+        if int(server["guildid"]) == int(guild_id):
+            globalChat = i
+        i += 1
+    return globalChat
+
+
+###########################################################
+
+bot.run("放tickrt")
