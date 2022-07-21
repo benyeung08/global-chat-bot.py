@@ -141,4 +141,4 @@ def get_globalChat_id(guild_id):
 
 ###########################################################
 
-bot.run("放tickrt")
+bot.run('放tickrt')
