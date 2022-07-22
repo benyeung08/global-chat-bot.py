@@ -7,6 +7,7 @@ import asyncio
 import datetime
 import pytz
 from discord.ext import command
+from discord import Message, Guild, TextChannel
 
 bot = commands.Bot(command_prefix="!", help_command=None)
 
